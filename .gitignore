@@ -1,0 +1,14 @@
+.vs/
+.vscode/
+.zed/
+.fleet/
+.xmake/
+.cache/
+
+.DS_Store
+Thumbs.db
+
+build/
+sandbox/
+
+compile_commands.json

@@ -61,6 +61,15 @@ namespace filer {
     }
   }
 
+  bool grid_view::dispatch_event(const arc::event& ev) noexcept {
+    for (auto it = _items.rbegin(); it != _items.rend(); ++it) {
+      if ((*it)->dispatch_event(ev)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   std::shared_ptr<grid_view> grid(grid_options options) noexcept {
     return std::make_shared<grid_view>(
       std::move(options.items),

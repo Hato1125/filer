@@ -2,14 +2,24 @@
 
 #include "main.hh"
 #include "sidebar.hh"
+#include "viewer.hh"
 
 using namespace arc;
 
 struct app : public component {
   std::shared_ptr<view> build() noexcept override {
+    filer::path.set("/home/hato");
+
     return row({
       .children = {
         std::make_shared<filer::sidebar>(),
+        std::make_shared<filer::viewer>()
+          | frame({
+              .frame={
+                .width = infinity,
+                .height = infinity,
+              }
+            }),
       }
     });
   }

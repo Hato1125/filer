@@ -71,6 +71,10 @@ namespace filer {
           },
           .halign = halign::left
         })
-      | tap([path](auto, auto, auto) noexcept {});
+      | tap([path](mouse_button button, auto, auto) noexcept {
+          if (button == mouse_button::left) {
+            filer::path.set(path);
+          }
+        });
   }
 }

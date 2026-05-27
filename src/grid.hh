@@ -28,6 +28,8 @@ namespace filer {
 
     void paint(arc::canvas& canvas) noexcept override;
 
+    bool dispatch_event(const arc::event& ev) noexcept override;
+
   private:
     std::vector<std::shared_ptr<arc::view>> _items;
     float _hgap;

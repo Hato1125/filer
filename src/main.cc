@@ -1,25 +1,56 @@
 #include <arc.hh>
+#include <filesystem>
 
 #include "main.hh"
 #include "sidebar.hh"
 #include "viewer.hh"
+#include "navigations.hh"
+#include "pankuzu.hh"
+#include "history.hh"
 
 using namespace arc;
 
 struct app : public component {
   std::shared_ptr<view> build() noexcept override {
-    filer::path.set("/home/hato");
+    if (filer::history::current.get().empty()) {
+      filer::history::cd("/home/hato");
+    }
 
     return row({
       .children = {
         std::make_shared<filer::sidebar>(),
-        std::make_shared<filer::viewer>()
+        column({
+          .children = {
+            row({
+              .gap = 18,
+              .children = {
+                std::make_shared<filer::navigations>(),
+                std::make_shared<filer::pankuzu>(),
+              }
+            })
+              | padding(20)
+              | frame({
+                  .frame={
+                    .width = infinity,
+                    .height = 45,
+                  }
+                }),
+            std::make_shared<filer::viewer>()
+              | frame({
+                  .frame= {
+                    .width = infinity,
+                    .height = infinity,
+                  }
+                }),
+          }
+        })
           | frame({
               .frame={
                 .width = infinity,
                 .height = infinity,
               }
-            }),
+            })
+          | background({ .color = colors::black }),
       }
     });
   }
@@ -41,7 +72,7 @@ int main() {
       },
       {
         filer::text_font,
-        "/usr/share/fonts/One-UI-Sans-Font/Fonts/(Medium) Samsung Sharp Sans.ttf",
+        "/usr/share/fonts/One-UI-Sans-Font/Fonts/(Bold) Samsung Sharp Sans.ttf",
       }
     },
     .scenes = {

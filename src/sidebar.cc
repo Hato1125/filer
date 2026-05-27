@@ -1,5 +1,6 @@
 #include "sidebar.hh"
 #include "direction.hh"
+#include "history.hh"
 #include "main.hh"
 
 using namespace arc;
@@ -73,7 +74,7 @@ namespace filer {
         })
       | tap([path](mouse_button button, auto, auto) noexcept {
           if (button == mouse_button::left) {
-            filer::path.set(path);
+            history::cd(path);
           }
         });
   }

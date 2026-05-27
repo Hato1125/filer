@@ -1,7 +1,6 @@
-#include <print>
-
 #include "viewer.hh"
 #include "grid.hh"
+#include "history.hh"
 #include "main.hh"
 
 using namespace arc;
@@ -10,7 +9,9 @@ namespace filer {
   std::shared_ptr<arc::view> viewer::build() noexcept {
     std::vector<std::shared_ptr<view>> entrys;
 
-    for (const auto& entry : std::filesystem::directory_iterator(path.get())) {
+    const auto cpath = history::current.get();
+
+    for (const auto& entry : std::filesystem::directory_iterator(cpath)) {
       entrys.push_back(
         entry.is_directory()
           ? _dir(entry.path())
@@ -22,7 +23,7 @@ namespace filer {
       .items = std::move(entrys),
       .hgap = 8,
       .vgap = 8,
-      .item_size = {95, 120}
+      .item_size = {95, 100}
     }) | background({ .color = colors::black });
   }
 
@@ -30,14 +31,14 @@ namespace filer {
     std::filesystem::path path
   ) const noexcept {
     return column({
-      .gap = 14,
+      .gap = 10,
       .align = halign::center,
       .children = {
         text({
           .label = "\ue2c7",
           .font = &material_filled_font,
           .color = colors::white,
-          .size = 40,
+          .size = 48,
         }),
         text({
           .label = limitter(path.filename().string(), 12),
@@ -55,7 +56,7 @@ namespace filer {
         })
       | tap([path](mouse_button button, auto, auto) noexcept {
           if (button == mouse_button::left) {
-            filer::path.set(path);
+            history::cd(path);
           }
         });
   }
@@ -64,14 +65,14 @@ namespace filer {
     std::filesystem::path path
   ) const noexcept {
     return column({
-      .gap = 14,
+      .gap = 10,
       .align = halign::center,
       .children = {
         text({
           .label = "\uea7d",
           .font = &material_filled_font,
           .color = colors::white,
-          .size = 40,
+          .size = 48,
         }),
         text({
           .label = limitter(path.filename().string(), 12),

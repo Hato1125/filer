@@ -1,26 +1,19 @@
+#include <algorithm>
+#include <cctype>
+#include <vector>
+
 #include "viewer.hh"
 #include "grid.hh"
 #include "history.hh"
 #include "main.hh"
 
 using namespace arc;
+namespace fs = std::filesystem;
 
 namespace filer {
   std::shared_ptr<arc::view> viewer::build() noexcept {
-    std::vector<std::shared_ptr<view>> entrys;
-
-    const auto cpath = history::current.get();
-
-    for (const auto& entry : std::filesystem::directory_iterator(cpath)) {
-      entrys.push_back(
-        entry.is_directory()
-          ? _dir(entry.path())
-          : _file(entry.path())
-      );
-    }
-
     return grid({
-      .items = std::move(entrys),
+      .items = sorted_dirs(history::current.get()),
       .hgap = 8,
       .vgap = 8,
       .item_size = {95, 100}
@@ -88,6 +81,60 @@ namespace filer {
             .height = infinity
           }
         });
+  }
+
+  std::vector<std::shared_ptr<view>> viewer::sorted_dirs(
+    const std::filesystem::path& path
+  ) const noexcept {
+    std::vector<std::shared_ptr<view>> entrys;
+
+    const auto cpath = history::current.get();
+    auto dirs = std::vector<fs::directory_entry>(
+      fs::directory_iterator(cpath),
+      fs::directory_iterator()
+    );
+
+    const auto sort_key = [](const fs::directory_entry& entry) -> std::string {
+      auto name = entry.path().filename().string();
+
+      std::transform(
+        name.begin(),
+        name.end(),
+        name.begin(),
+        [](unsigned char c) -> char {
+          return static_cast<char>(std::tolower(c));
+        }
+      );
+
+      return name;
+    };
+
+    std::sort(
+      dirs.begin(),
+      dirs.end(),
+      [&sort_key](const fs::directory_entry& a, const fs::directory_entry& b) -> bool {
+        if (a.is_directory() != b.is_directory()) {
+          return a.is_directory();
+        }
+
+        const auto a_key = sort_key(a);
+        const auto b_key = sort_key(b);
+
+        return a_key != b_key
+          ? a_key < b_key
+          : a.path().filename().string() < b.path().filename().string();
+      }
+    );
+
+    for (const auto& entry : dirs) {
+      entrys.push_back(
+        entry.is_directory()
+          ? _dir(entry)
+          : _file(entry)
+      );
+    }
+
+    return entrys;
   }
 
   std::string viewer::limitter(std::string_view str, std::size_t len) const noexcept {

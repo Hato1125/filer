@@ -8,39 +8,13 @@ add_rules('plugin.compile_commands.autoupdate', {
   outputdir = 'build'
 })
 
-package('arc')
-  set_kind('library')
-  set_homepage('https://github.com/Hato1125/arc')
-  set_description('Arc core UI framework')
-
-  add_urls('git@github.com:Hato1125/arc.git')
-  add_deps('libsdl3', 'nanovg', 'libepoxy')
-  add_includedirs('include/src')
-
-  on_install(function(package)
-    import('package.tools.xmake').install(package, {}, {
-      target = 'arc'
-    })
-    os.cp('src', package:installdir('include'))
-  end)
-
-  on_test(function(package)
-    assert(package:has_cxxincludes('arc.hh', {
-      configs = {
-        languages = 'c++26'
-      }
-    }))
-  end)
-package_end()
-
-add_requires('arc main', {
-  debug = is_mode('debug')
-})
+-- Use the local arc checkout directly: arc is compiled from its live source as
+-- part of this build, so edits in ../arc are picked up on the next `xmake build`
+-- with no package reinstall. (Was a git package: git@github.com:Hato1125/arc.git)
+includes('../arc')
 
 target('filer')
   set_kind('binary')
   set_rundir('$(projectdir)')
   add_files('src/**.cc')
-  add_packages('arc', {
-    public = true
-  })
+  add_deps('arc')

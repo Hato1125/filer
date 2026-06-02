@@ -11,7 +11,7 @@ namespace filer {
   public:
     sidebar() noexcept;
 
-    std::shared_ptr<arc::view> build() noexcept override;
+    std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;
 
   private:
     std::filesystem::path home;

@@ -5,7 +5,7 @@
 using namespace arc;
 
 namespace filer {
-  std::shared_ptr<arc::view> navigations::build() noexcept {
+  std::shared_ptr<arc::view> navigations::build(arc::context& ctx) noexcept {
     return row({
       .align = valign::center,
       .children = {

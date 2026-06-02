@@ -8,7 +8,7 @@
 namespace filer {
   class pankuzu : public arc::component {
   public:
-    std::shared_ptr<arc::view> build() noexcept override;
+    std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;
 
   private:
     std::shared_ptr<arc::view> _separator() noexcept;

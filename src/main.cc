@@ -10,10 +10,10 @@
 
 using namespace arc;
 
-struct app : public component {
-  std::shared_ptr<view> build() noexcept override {
+namespace filer {
+  std::shared_ptr<view> app::build(arc::context& ctx) noexcept {
     if (filer::history::current.get().empty()) {
-      filer::history::cd("/home/hato");
+      filer::history::cd(std::getenv("HOME"));
     }
 
     return row({
@@ -54,7 +54,7 @@ struct app : public component {
       }
     });
   }
-};
+}
 
 int main() {
   run({
@@ -72,14 +72,14 @@ int main() {
       },
       {
         filer::text_font,
-        "/usr/share/fonts/One-UI-Sans-Font/Fonts/(Bold) Samsung Sharp Sans.ttf",
+        "/usr/share/fonts/TTF/ComicMono.ttf",
       }
     },
     .scenes = {
       window({
-        .root = std::make_unique<app>(),
+        .root = std::make_unique<filer::app>(),
         .title = "Filer",
-      })
+      }),
     }
   });
 }

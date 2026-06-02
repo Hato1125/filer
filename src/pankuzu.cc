@@ -5,7 +5,7 @@
 using namespace arc;
 
 namespace filer {
-  std::shared_ptr<arc::view> pankuzu::build() noexcept {
+  std::shared_ptr<arc::view> pankuzu::build(arc::context& ctx) noexcept {
     std::vector<std::shared_ptr<view>> paths;
 
     std::filesystem::path now = history::current.get();

@@ -15,9 +15,9 @@ namespace filer {
 
   arc::size grid_view::measure(
     const arc::constraint& cont,
-    const arc::canvas& canvas
+    arc::context& ctx
   ) noexcept {
-    compute_size = cont.max;
+    compute_size.width = cont.max.width;
     _cols = std::max<std::size_t>(
       1,
       static_cast<std::size_t>(compute_size.width / (_item_size.width + _hgap))
@@ -28,14 +28,19 @@ namespace filer {
       item->measure({
         .min = _item_size,
         .max = _item_size,
-      }, canvas);
+      }, ctx);
     }
+
+    compute_size.height = _rows > 0
+      ? _rows * _item_size.height + (_rows - 1) * _vgap
+      : 0.0f;
+
     return compute_size;
   }
 
   void grid_view::layout(
     const arc::point& offset,
-    const arc::canvas& canvas
+    arc::context& ctx
   ) noexcept {
     float x = offset.x;
     float y = offset.y;
@@ -45,7 +50,7 @@ namespace filer {
         if (index >= _items.size()) {
           break;
         }
-        _items[index]->layout({x, y}, canvas);
+        _items[index]->layout({x, y}, ctx);
         x += _item_size.width + _hgap;
       }
       x = offset.x;
@@ -55,15 +60,15 @@ namespace filer {
     compute_pos = offset;
   }
 
-  void grid_view::paint(arc::canvas& canvas) noexcept {
+  void grid_view::paint(arc::context& ctx) noexcept {
     for (auto& item : _items) {
-      item->paint(canvas);
+      item->paint(ctx);
     }
   }
 
-  bool grid_view::dispatch_event(const arc::event& ev) noexcept {
+  bool grid_view::dispatch_event(const arc::event& ev, arc::context& ctx) noexcept {
     for (auto it = _items.rbegin(); it != _items.rend(); ++it) {
-      if ((*it)->dispatch_event(ev)) {
+      if ((*it)->dispatch_event(ev, ctx)) {
         return true;
       }
     }

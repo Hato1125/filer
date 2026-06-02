@@ -20,7 +20,7 @@ namespace filer {
     home = std::getenv("HOME");
   }
 
-  std::shared_ptr<arc::view> sidebar::build() noexcept {
+  std::shared_ptr<arc::view> sidebar::build(arc::context& ctx) noexcept {
     return column({
       .children = {
         _button(DESKTOP_ICON, home / "Desktop"),

@@ -11,13 +11,15 @@ using namespace arc;
 namespace fs = std::filesystem;
 
 namespace filer {
-  std::shared_ptr<arc::view> viewer::build() noexcept {
+  std::shared_ptr<arc::view> viewer::build(arc::context& ctx) noexcept {
     return grid({
       .items = sorted_dirs(history::current.get()),
       .hgap = 8,
       .vgap = 8,
       .item_size = {95, 100}
-    }) | background({ .color = colors::black });
+    })
+      | scroll({ .offset = 24 })
+      | background({ .color = colors::black });
   }
 
   std::shared_ptr<arc::view> viewer::_dir(

@@ -18,17 +18,16 @@ namespace filer {
 
     arc::size measure(
       const arc::constraint& cont,
-      const arc::canvas& canvas
+      arc::context& ctx
     ) noexcept override;
 
     void layout(
       const arc::point& offset,
-      const arc::canvas& canvas
+      arc::context& ctx
     ) noexcept override;
 
-    void paint(arc::canvas& canvas) noexcept override;
-
-    bool dispatch_event(const arc::event& ev) noexcept override;
+    void paint(arc::context& ctx) noexcept override;
+    bool dispatch_event(const arc::event& ev, arc::context& ctx) noexcept override;
 
   private:
     std::vector<std::shared_ptr<arc::view>> _items;

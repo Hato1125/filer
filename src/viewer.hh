@@ -16,10 +16,12 @@ namespace filer {
     ) const noexcept;
 
     std::shared_ptr<arc::view> _file(
+      arc::canvas& canvas,
       std::filesystem::path path
     ) const noexcept;
 
     std::vector<std::shared_ptr<view>> sorted_dirs(
+      arc::canvas& canvas,
       const std::filesystem::path& path
     ) const noexcept;
 

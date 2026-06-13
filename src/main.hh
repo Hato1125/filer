@@ -4,9 +4,9 @@
 #include <arc.hh>
 
 namespace filer {
-  inline arc::font material_filled_font;
-  inline arc::font material_round_font;
-  inline arc::font text_font;
+  inline arc::font_family material_filled_font;
+  inline arc::font_family material_round_font;
+  inline arc::font_family text_font;
 
   struct app : public arc::component {
     std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;

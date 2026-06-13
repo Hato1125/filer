@@ -6,6 +6,7 @@
 #include "grid.hh"
 #include "history.hh"
 #include "main.hh"
+#include "thumbnail.hh"
 
 using namespace arc;
 namespace fs = std::filesystem;
@@ -13,13 +14,13 @@ namespace fs = std::filesystem;
 namespace filer {
   std::shared_ptr<arc::view> viewer::build(arc::context& ctx) noexcept {
     return grid({
-      .items = sorted_dirs(history::current.get()),
+      .items = sorted_dirs(*ctx.canvas(), history::current.get()),
       .hgap = 8,
       .vgap = 8,
       .item_size = {95, 100}
     })
       | scroll({ .offset = 24 })
-      | background({ .color = colors::black });
+      | bg({ .color = colors::black });
   }
 
   std::shared_ptr<arc::view> viewer::_dir(
@@ -57,8 +58,39 @@ namespace filer {
   }
 
   std::shared_ptr<arc::view> viewer::_file(
+    canvas& canvas,
     std::filesystem::path path
   ) const noexcept {
+    std::optional<std::reference_wrapper<arc::image>> thum;
+
+    thum = thumbnail::get_thumbnail(canvas, path);
+
+    if (thum) {
+      return column({
+        .gap = 10,
+        .align = halign::center,
+        .children = {
+          arc::img({
+            .src = &(thum->get()),
+            .size = {50, 50},
+            .fit = fit::contain
+          }),
+          text({
+            .label = limitter(path.filename().string(), 12),
+            .font = &text_font,
+            .color = colors::white,
+            .size = 13,
+          })
+        }
+      })
+        | frame({
+            .frame = {
+              .width = infinity,
+              .height = infinity
+            }
+          });
+    }
+
     return column({
       .gap = 10,
       .align = halign::center,
@@ -86,6 +118,7 @@ namespace filer {
   }
 
   std::vector<std::shared_ptr<view>> viewer::sorted_dirs(
+    canvas& canvas,
     const std::filesystem::path& path
   ) const noexcept {
     std::vector<std::shared_ptr<view>> entrys;
@@ -132,7 +165,7 @@ namespace filer {
       entrys.push_back(
         entry.is_directory()
           ? _dir(entry)
-          : _file(entry)
+          : _file(canvas, entry)
       );
     }
 

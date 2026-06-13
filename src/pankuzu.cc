@@ -57,7 +57,7 @@ namespace filer {
       .size = 13,
     })
       | padding(5, 8)
-      | background({
+      | bg({
           .color = color{255, 255, 255, 35},
           .round = 9,
         })

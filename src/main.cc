@@ -50,7 +50,7 @@ namespace filer {
                 .height = infinity,
               }
             })
-          | background({ .color = colors::black }),
+          | bg({ .color = colors::black }),
       }
     });
   }
@@ -72,7 +72,7 @@ int main() {
       },
       {
         filer::text_font,
-        "/usr/share/fonts/TTF/ComicMono.ttf",
+        "/home/hato/Downloads/Lexend,Sawarabi_Gothic/Sawarabi_Gothic/SawarabiGothic-Regular.ttf",
       }
     },
     .scenes = {

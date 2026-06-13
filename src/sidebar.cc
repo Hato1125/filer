@@ -41,7 +41,7 @@ namespace filer {
           .valign = valign::top,
         })
       | padding(20, 24)
-      | background({ .color = colors::black });
+      | bg({ .color = colors::black });
   }
 
   std::shared_ptr<arc::view> sidebar::_button(

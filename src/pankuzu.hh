@@ -14,6 +14,7 @@ namespace filer {
     std::shared_ptr<arc::view> _separator() noexcept;
 
     std::shared_ptr<arc::view> _item(
+      std::filesystem::path current,
       std::filesystem::path path
     ) noexcept;
   };

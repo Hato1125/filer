@@ -1,5 +1,4 @@
 #include "sidebar.hh"
-#include "direction.hh"
 #include "history.hh"
 #include "main.hh"
 
@@ -29,18 +28,16 @@ namespace filer {
         _button(DOCUMENTS_ICON, home / "Documents"),
         _button(PICTURES_ICON, home / "Pictures"),
         _button(VIDEOS_ICON, home / "Videos"),
-        _button(MUSICS_ICON, home / "Musics"),
+        _button(MUSICS_ICON, home / "Music"),
       }
     })
       | frame({
-          .frame = {
-            .width = 180,
-            .height = infinity
-          },
+          .width = 160,
+          .height = infinity,
           .halign = halign::left,
           .valign = valign::top,
         })
-      | padding(20, 24)
+      | padding(8)
       | bg({ .color = colors::black });
   }
 
@@ -48,29 +45,41 @@ namespace filer {
     std::string_view icon,
     std::filesystem::path path
   ) noexcept {
+    const bool is_current = path == history::current.get();
+
     return row({
       .gap = 13,
       .children = {
         text({
           .label = icon,
           .font = &material_filled_font,
-          .color = colors::white,
+          .color = is_current
+            ? colors::black
+            : colors::white,
           .size = 16,
         }),
         text({
           .label = path.filename().string(),
           .font = &text_font,
-          .color = colors::white,
+          .weight = font_weights::semibold,
+          .color = is_current
+            ? colors::black
+            : colors::white,
           .size = 14,
         })
       }
     })
       | frame({
-          .frame = {
-            .width = infinity,
-            .height = 35,
-          },
+          .width = 123,
+          .height = 30,
           .halign = halign::left
+        })
+      | padding(0, 0, 0, 12)
+      | bg({
+          .color = is_current
+            ? colors::white
+            : colors::black,
+          .round = 15,
         })
       | tap([path](mouse_button button, auto, auto) noexcept {
           if (button == mouse_button::left) {

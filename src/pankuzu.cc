@@ -10,6 +10,7 @@ namespace filer {
 
     std::filesystem::path now = history::current.get();
     std::filesystem::path root = now.root_directory();
+    std::filesystem::path current = now;
     bool root_separator = false;
 
     do {
@@ -17,22 +18,19 @@ namespace filer {
         paths.push_back(_separator());
       }
       root_separator = true;
-      paths.push_back(_item(now));
+      paths.push_back(_item(current, now));
       now = now.parent_path();
     } while (now != root);
 
     std::reverse(paths.begin(), paths.end());
 
     return row({
-      .gap = 8,
+      .gap = 6,
       .align = valign::center,
       .children = std::move(paths),
     })
       | frame({
-          .frame = {
-            .width = infinity,
-            .height = infinity,
-          },
+          .width = infinity,
           .halign = halign::left,
           .valign = valign::center,
         });
@@ -44,22 +42,32 @@ namespace filer {
       .font = &material_filled_font,
       .color = colors::white,
       .size = 24,
-    });
+    }) | padding(4, 5, 0, 0);
   }
 
   std::shared_ptr<arc::view> pankuzu::_item(
+    std::filesystem::path current,
     std::filesystem::path path
   ) noexcept {
+    const bool is_current = path == current;
+
     return text({
       .label = path.filename().string(),
       .font = &text_font,
-      .color = colors::white,
-      .size = 13,
+      .weight = is_current
+        ? font_weights::black
+        : font_weights::semibold,
+      .color = is_current
+        ? colors::black
+        : colors::white,
+      .size = 12,
     })
-      | padding(5, 8)
+      | padding(4, 9)
       | bg({
-          .color = color{255, 255, 255, 35},
-          .round = 9,
+          .color = is_current
+            ? color{255, 255, 255, 255}
+            : color{255, 255, 255, 35},
+          .round = 8.0f,
         })
       | tap([path](mouse_button button, auto, auto) noexcept {
           if (button == mouse_button::left) {

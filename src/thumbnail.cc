@@ -1,15 +1,23 @@
-#include <print>
 #include <algorithm>
 #include <array>
 #include <cctype>
 #include <cstdlib>
+#include <memory>
+#include <utility>
 
 #include <md5.h>
 
+#include "main.hh"
 #include "thumbnail.hh"
 
 namespace filer::thumbnail {
   namespace fs = std::filesystem;
+
+  struct preview_state {
+    arc::state<std::shared_ptr<arc::image::raw>> raw;
+    bool loading = false;
+    bool failed = false;
+  };
 
   namespace {
     bool is_uri_unreserved(unsigned char c) noexcept {
@@ -88,72 +96,128 @@ namespace filer::thumbnail {
       return std::ranges::find(extensions, extension) != extensions.end();
     }
 
-    std::optional<
-      std::reference_wrapper<arc::image>
-    > load_image(arc::canvas& canvas, const fs::path& path) {
-      if (thumbnails.contains(path)) {
-        return thumbnails.at(path);
-      }
+    std::optional<fs::path> find_thumbnail_source(const fs::path& path) noexcept {
+      static MD5 md5;
+      static constexpr std::array<std::string_view, 4> sizes = {
+        "xx-large",
+        "x-large",
+        "large",
+        "normal",
+      };
 
-      arc::image image;
-      if (!image.load(canvas, path.string())) {
-        return std::nullopt;
-      }
+      const auto canonical_path = file_uri(path);
+      const auto md5ed_path = md5(
+        canonical_path.data(),
+        canonical_path.size()
+      );
 
-      thumbnails.emplace(path, std::move(image));
-      return thumbnails.at(path);
-    }
-  }
+      if (const auto cache_dir = xdg_cache_dir()) {
+        for (const auto dir : sizes) {
+          const auto thumbnail_path = *cache_dir
+            / "thumbnails"
+            / dir
+            / std::format("{}.png", md5ed_path);
 
-  std::optional<
-    std::reference_wrapper<arc::image>
-  > get_thumbnail(
-    arc::canvas& canvas,
-    const fs::path& path
-  ) noexcept {
-    static MD5 md5;
-    static constexpr std::array<std::string_view, 4> sizes = {
-      "xx-large",
-      "x-large",
-      "large",
-      "normal",
-    };
-
-    const auto canonical_path = file_uri(path);
-    const auto md5ed_path = md5(
-      canonical_path.data(),
-      canonical_path.size()
-    );
-
-    if (const auto cache_dir = xdg_cache_dir()) {
-      for (const auto dir : sizes) {
-        const auto thumbnail_path = *cache_dir
-          / "thumbnails"
-          / dir
-          / std::format("{}.png", md5ed_path);
-
-        std::println("{}", thumbnail_path);
-
-        if (fs::exists(thumbnail_path)) {
-          if (thumbnails.contains(thumbnail_path)) {
-            return thumbnails.at(thumbnail_path);
-          }
-
-          arc::image thumbnail;
-          if (thumbnail.load(canvas, thumbnail_path.string())) {
-            thumbnails.emplace(thumbnail_path, std::move(thumbnail));
-            return thumbnails.at(thumbnail_path);
+          if (fs::exists(thumbnail_path)) {
+            return thumbnail_path;
           }
         }
       }
+
+      if (is_directly_loadable_image(path)) {
+        return path;
+      }
+
+      return std::nullopt;
     }
 
-    if (is_directly_loadable_image(path)) {
-      if (auto image = load_image(canvas, path)) {
-        return image;
+    std::shared_ptr<arc::image::raw> retain_raw(arc::image::raw&& raw) {
+      return {
+        new arc::image::raw(std::move(raw)),
+        [](arc::image::raw* raw) {
+          raw->free();
+          delete raw;
+        }
+      };
+    }
+
+    void request_raw_load(
+      arc::context ctx,
+      fs::path source,
+      std::weak_ptr<preview_state> state
+    ) noexcept {
+      ctx.spawn([
+        ctx,
+        source = std::move(source),
+        state = std::move(state)
+      ]() mutable {
+        auto raw = arc::image::raw::decode(source.string());
+        auto decoded = raw
+          ? retain_raw(std::move(*raw))
+          : nullptr;
+
+        ctx.post([
+          decoded = std::move(decoded),
+          state = std::move(state)
+        ]() mutable {
+          auto locked = state.lock();
+          if (!locked) {
+            return;
+          }
+
+          if (!decoded) {
+            locked->loading = false;
+            locked->failed = true;
+            return;
+          }
+
+          locked->loading = false;
+          locked->raw.set(std::move(decoded));
+        });
+      });
+    }
+  }
+
+  preview::preview(fs::path path) noexcept
+    : _path(std::move(path)),
+      _state(std::make_shared<preview_state>()) {}
+
+  std::shared_ptr<arc::view> preview::build(arc::context& ctx) noexcept {
+    if (_image) {
+      return arc::img({
+        .src = &_image,
+        .size = {95, 75},
+        .fit = arc::fit::contain
+      });
+    }
+
+    const auto raw = _state->raw.get();
+    if (!_state->failed && raw && ctx.canvas()) {
+      if (_image.load(*ctx.canvas(), *raw)) {
+        return arc::img({
+          .src = &_image,
+          .size = {95, 75},
+          .fit = arc::fit::contain
+        });
+      }
+
+      _state->failed = true;
+    }
+
+    if (!_state->loading && !_state->failed) {
+      if (const auto source = find_thumbnail_source(_path)) {
+        _state->loading = true;
+        request_raw_load(ctx, *source, _state);
+      } else {
+        _state->failed = true;
       }
     }
 
-    return std::nullopt;
+    return arc::text({
+      .label = "\uea7d",
+      .font = &filer::material_filled_font,
+      .color = arc::colors::white,
+      .size = 48,
+    });
   }
 }

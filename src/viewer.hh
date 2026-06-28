@@ -2,8 +2,12 @@
 #define _FILER_VIEWER_HH
 
 #include <filesystem>
+#include <map>
+#include <memory>
 
 #include <arc.hh>
+
+#include "thumbnail.hh"
 
 namespace filer {
   class viewer : public arc::component {
@@ -16,16 +20,16 @@ namespace filer {
     ) const noexcept;
 
     std::shared_ptr<arc::view> _file(
-      arc::canvas& canvas,
       std::filesystem::path path
-    ) const noexcept;
+    ) noexcept;
 
     std::vector<std::shared_ptr<view>> sorted_dirs(
-      arc::canvas& canvas,
       const std::filesystem::path& path
-    ) const noexcept;
+    ) noexcept;
 
     std::string limitter(std::string_view str, std::size_t len) const noexcept;
+
+    std::map<std::filesystem::path, std::shared_ptr<thumbnail::preview>> _previews;
   };
 }
 

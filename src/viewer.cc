@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <set>
 #include <vector>
 
 #include "viewer.hh"
@@ -14,7 +15,7 @@ namespace fs = std::filesystem;
 namespace filer {
   std::shared_ptr<arc::view> viewer::build(arc::context& ctx) noexcept {
     return grid({
-      .items = sorted_dirs(*ctx.canvas(), history::current.get()),
+      .items = sorted_dirs(history::current.get()),
       .hgap = 8,
       .vgap = 8,
       .item_size = {95, 100}
@@ -39,16 +40,15 @@ namespace filer {
         text({
           .label = limitter(path.filename().string(), 12),
           .font = &text_font,
+          .weight = font_weights::semibold,
           .color = colors::white,
           .size = 13,
         })
       }
     })
       | frame({
-          .frame = {
-            .width = infinity,
-            .height = infinity
-          }
+          .width = infinity,
+          .height = infinity
         })
       | tap([path](mouse_button button, auto, auto) noexcept {
           if (button == mouse_button::left) {
@@ -58,74 +58,41 @@ namespace filer {
   }
 
   std::shared_ptr<arc::view> viewer::_file(
-    canvas& canvas,
     std::filesystem::path path
-  ) const noexcept {
-    std::optional<std::reference_wrapper<arc::image>> thum;
-
-    thum = thumbnail::get_thumbnail(canvas, path);
-
-    if (thum) {
-      return column({
-        .gap = 10,
-        .align = halign::center,
-        .children = {
-          arc::img({
-            .src = &(thum->get()),
-            .size = {50, 50},
-            .fit = fit::contain
-          }),
-          text({
-            .label = limitter(path.filename().string(), 12),
-            .font = &text_font,
-            .color = colors::white,
-            .size = 13,
-          })
-        }
-      })
-        | frame({
-            .frame = {
-              .width = infinity,
-              .height = infinity
-            }
-          });
+  ) noexcept {
+    auto [preview, inserted] = _previews.try_emplace(path);
+    if (inserted) {
+      preview->second = std::make_shared<thumbnail::preview>(path);
     }
 
     return column({
       .gap = 10,
       .align = halign::center,
       .children = {
-        text({
-          .label = "\uea7d",
-          .font = &material_filled_font,
-          .color = colors::white,
-          .size = 48,
-        }),
+        preview->second,
         text({
           .label = limitter(path.filename().string(), 12),
           .font = &text_font,
+          .weight = font_weights::semibold,
           .color = colors::white,
           .size = 13,
         })
       }
     })
       | frame({
-          .frame = {
-            .width = infinity,
-            .height = infinity
-          }
+          .width = infinity,
+          .height = infinity
         });
   }
 
   std::vector<std::shared_ptr<view>> viewer::sorted_dirs(
-    canvas& canvas,
     const std::filesystem::path& path
-  ) const noexcept {
+  ) noexcept {
     std::vector<std::shared_ptr<view>> entrys;
+    std::set<fs::path> visible_files;
 
-    const auto cpath = history::current.get();
     auto dirs = std::vector<fs::directory_entry>(
-      fs::directory_iterator(cpath),
+      fs::directory_iterator(path),
       fs::directory_iterator()
     );
 
@@ -162,11 +129,23 @@ namespace filer {
     );
 
     for (const auto& entry : dirs) {
+      if (!entry.is_directory()) {
+        visible_files.insert(entry.path());
+      }
+
       entrys.push_back(
         entry.is_directory()
           ? _dir(entry)
-          : _file(canvas, entry)
+          : _file(entry)
       );
+    }
+
+    for (auto it = _previews.begin(); it != _previews.end();) {
+      if (visible_files.contains(it->first)) {
+        ++it;
+      } else {
+        it = _previews.erase(it);
+      }
     }
 
     return entrys;

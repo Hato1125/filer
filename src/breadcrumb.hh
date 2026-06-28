@@ -1,12 +1,12 @@
-#ifndef _FILER_PANKUZU_HH
-#define _FILER_PANKUZU_HH
+#ifndef _FILER_BREADCRUMB_HH
+#define _FILER_BREADCRUMB_HH
 
 #include <filesystem>
 
 #include <arc.hh>
 
 namespace filer {
-  class pankuzu : public arc::component {
+  class breadcrumb : public arc::component {
   public:
     std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;
 

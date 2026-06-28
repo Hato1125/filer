@@ -5,7 +5,6 @@
 #include "sidebar.hh"
 #include "viewer.hh"
 #include "navigations.hh"
-#include "pankuzu.hh"
 #include "history.hh"
 #include "actions.hh"
 

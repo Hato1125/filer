@@ -1,5 +1,4 @@
 #include "actions.hh"
-#include "history.hh"
 #include "main.hh"
 #include "utils/color.hh"
 
@@ -19,7 +18,7 @@ namespace filer {
           | frame({ .width = 35, .height = 35 })
           | tap([](mouse_button button, auto, auto) noexcept {
               if (button == mouse_button::left) {
-                history::back();
+                // TODO
               }
             }),
         box({.size = {1, 20}, .color = color{255, 255, 255, 100}, .round = 0}),
@@ -32,7 +31,7 @@ namespace filer {
           | frame({ .width = 35, .height = 35 })
           | tap([](mouse_button button, auto, auto) noexcept {
               if (button == mouse_button::left) {
-                history::forward();
+                // TODO
               }
             }),
         box({.size = {1, 20}, .color = color{255, 255, 255, 100}, .round = 0}),
@@ -45,7 +44,7 @@ namespace filer {
           | frame({ .width = 35, .height = 35 })
           | tap([](mouse_button button, auto, auto) noexcept {
               if (button == mouse_button::left) {
-                history::forward();
+                // TODO
               }
             })
       }

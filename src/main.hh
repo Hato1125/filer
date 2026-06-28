@@ -8,8 +8,12 @@ namespace filer {
   inline arc::font_family material_round_font;
   inline arc::font_family text_font;
 
-  struct app : public arc::component {
+  class app : public arc::component {
+  public:
     std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;
+
+  private:
+    std::shared_ptr<arc::view> header(arc::context& ctx) noexcept;
   };
 }
 

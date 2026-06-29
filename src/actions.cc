@@ -13,7 +13,7 @@ namespace filer {
           .label = "\ue0ee",
           .font = &material_filled_font,
           .color = colors::white,
-          .size = 17,
+          .size = 16,
         })
           | frame({ .width = 35, .height = 35 })
           | tap([](mouse_button button, auto, auto) noexcept {
@@ -21,12 +21,12 @@ namespace filer {
                 // TODO
               }
             }),
-        box({.size = {1, 20}, .color = color{255, 255, 255, 100}, .round = 0}),
+        box({.size = {1, 20}, .color = colors::zinc_500, .round = 0}),
         text({
           .label = "\ue5d3",
           .font = &material_filled_font,
           .color = colors::white,
-          .size = 17,
+          .size = 16,
         })
           | frame({ .width = 35, .height = 35 })
           | tap([](mouse_button button, auto, auto) noexcept {
@@ -34,12 +34,12 @@ namespace filer {
                 // TODO
               }
             }),
-        box({.size = {1, 20}, .color = color{255, 255, 255, 100}, .round = 0}),
+        box({.size = {1, 20}, .color = colors::zinc_500, .round = 0}),
         text({
           .label = "\ue8b6",
           .font = &material_filled_font,
           .color = colors::white,
-          .size = 17,
+          .size = 16,
         })
           | frame({ .width = 35, .height = 35 })
           | tap([](mouse_button button, auto, auto) noexcept {
@@ -48,17 +48,6 @@ namespace filer {
               }
             })
       }
-    }) | bg({.color = colors::stone_800, .round = 17.5f});
-  }
-
-  std::shared_ptr<arc::view> actions::separator() noexcept {
-    return text({
-      .label = "|",
-      .font = &text_font,
-      .weight = font_weights::semibold,
-      .color = color{255, 255, 255, 100},
-      .size = 20,
-    })
-      | frame({ .width = 3, .height = 30 });
+    }) | bg({.color = colors::zinc_800, .round = 17.5f});
   }
 }

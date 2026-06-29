@@ -7,9 +7,6 @@ namespace filer {
   class actions : public arc::component {
   public:
     std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;
-
-  private:
-    std::shared_ptr<arc::view> separator() noexcept;
   };
 }
 

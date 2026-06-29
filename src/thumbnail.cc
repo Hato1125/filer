@@ -2,7 +2,9 @@
 #include <array>
 #include <cctype>
 #include <cstdlib>
+#include <format>
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include <md5.h>
@@ -142,12 +144,12 @@ namespace filer::thumbnail {
     }
 
     void request_raw_load(
-      arc::context ctx,
+      arc::context& ctx,
       fs::path source,
       std::weak_ptr<preview_state> state
     ) noexcept {
       ctx.spawn([
-        ctx,
+        &ctx,
         source = std::move(source),
         state = std::move(state)
       ]() mutable {
@@ -192,8 +194,8 @@ namespace filer::thumbnail {
     }
 
     const auto raw = _state->raw.get();
-    if (!_state->failed && raw && ctx.canvas()) {
-      if (_image.load(*ctx.canvas(), *raw)) {
+    if (!_state->failed && raw) {
+      if (_image.load(ctx.canvas(), *raw)) {
         return arc::img({
           .src = &_image,
           .size = {95, 75},

@@ -1,5 +1,7 @@
-#include <arc.hh>
 #include <filesystem>
+#include <memory>
+
+#include <arc.hh>
 
 #include "main.hh"
 #include "sidebar.hh"
@@ -18,41 +20,29 @@ namespace filer {
 
     return row({
       .children = {
-        std::make_shared<filer::sidebar>() | bg({.color = colors::red_500}),
+        std::make_shared<filer::sidebar>(),
         column({
-          .gap = 6,
           .children = {
-            header(ctx),
-            std::make_shared<filer::viewer>()
-              | frame({
-                  .width = infinity,
-                  .height = infinity,
-                })
+            row({
+              .children = {
+                std::make_shared<filer::navigations>(),
+                spacer(),
+                std::make_shared<filer::actions>(),
+              },
+            })
+              | padding(8)
+              | bg({ .color = colors::black }),
+            std::make_shared<filer::viewer>(),
           }
         })
           | frame({
               .width = infinity,
               .height = infinity,
+              .halign = halign::left,
+              .valign = valign::top,
             })
       }
-    })
-      | frame({
-          .width = infinity,
-          .height = infinity,
-          .halign = halign::left,
-          .valign = valign::top,
-        })
-      | bg({ .color = colors::black });
-  }
-
-  std::shared_ptr<arc::view> app::header(arc::context& ctx) noexcept {
-    return row({
-      .children = {
-        std::make_shared<filer::navigations>(),
-        spacer(),
-        std::make_shared<filer::actions>(),
-      }
-    }) | padding(8);
+    });
   }
 }
 

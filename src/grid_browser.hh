@@ -1,5 +1,5 @@
-#ifndef _FILER_VIEWER_HH
-#define _FILER_VIEWER_HH
+#ifndef _FILER_GRID_BROWSER_HH
+#define _FILER_GRID_BROWSER_HH
 
 #include <filesystem>
 #include <map>
@@ -10,7 +10,7 @@
 #include "thumbnail.hh"
 
 namespace filer {
-  class viewer : public arc::component {
+  class grid_browser : public arc::component {
   public:
     std::shared_ptr<arc::view> build(arc::context& ctx) noexcept override;
 

@@ -5,7 +5,8 @@
 
 #include "main.hh"
 #include "sidebar.hh"
-#include "viewer.hh"
+#include "grid_browser.hh"
+#include "list_browser.hh"
 #include "navigations.hh"
 #include "history.hh"
 #include "actions.hh"
@@ -32,7 +33,9 @@ namespace filer {
             })
               | padding(8)
               | bg({ .color = colors::black }),
-            std::make_shared<filer::viewer>(),
+            current_browser_mode.get() == browser_mode::grid
+              ? std::shared_ptr<view>(std::make_shared<filer::grid_browser>())
+              : std::shared_ptr<view>(std::make_shared<filer::list_browser>()),
           }
         })
           | frame({

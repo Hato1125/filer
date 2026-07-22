@@ -4,9 +4,15 @@
 #include <arc.hh>
 
 namespace filer {
+  enum class browser_mode {
+    grid,
+    list,
+  };
+
   inline arc::font_family material_filled_font;
   inline arc::font_family material_round_font;
   inline arc::font_family text_font;
+  inline arc::state<browser_mode> current_browser_mode;
 
   class app : public arc::component {
   public:

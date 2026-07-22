@@ -135,7 +135,7 @@ namespace filer::thumbnail {
 
     std::shared_ptr<arc::image::raw> retain_raw(arc::image::raw&& raw) {
       return {
-        new arc::image::raw(std::move(raw)),
+        new arc::image::raw(raw),
         [](arc::image::raw* raw) {
           raw->free();
           delete raw;
@@ -189,7 +189,8 @@ namespace filer::thumbnail {
       return arc::img({
         .src = &_image,
         .size = {95, 75},
-        .fit = arc::fit::contain
+        .fit = arc::fit::contain,
+        .radius = 6,
       });
     }
 
@@ -199,7 +200,8 @@ namespace filer::thumbnail {
         return arc::img({
           .src = &_image,
           .size = {95, 75},
-          .fit = arc::fit::contain
+          .fit = arc::fit::contain,
+          .radius = 6,
         });
       }
 

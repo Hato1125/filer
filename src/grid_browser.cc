@@ -3,7 +3,7 @@
 #include <set>
 #include <vector>
 
-#include "viewer.hh"
+#include "grid_browser.hh"
 #include "grid.hh"
 #include "history.hh"
 #include "main.hh"
@@ -13,7 +13,7 @@ using namespace arc;
 namespace fs = std::filesystem;
 
 namespace filer {
-  std::shared_ptr<arc::view> viewer::build(arc::context& ctx) noexcept {
+  std::shared_ptr<arc::view> grid_browser::build(arc::context& ctx) noexcept {
     return grid({
       .items = sorted_dirs(history::current.get()),
       .hgap = 8,
@@ -24,7 +24,7 @@ namespace filer {
       | bg({ .color = colors::black });
   }
 
-  std::shared_ptr<arc::view> viewer::_dir(
+  std::shared_ptr<arc::view> grid_browser::_dir(
     std::filesystem::path path
   ) const noexcept {
     return column({
@@ -57,7 +57,7 @@ namespace filer {
         });
   }
 
-  std::shared_ptr<arc::view> viewer::_file(
+  std::shared_ptr<arc::view> grid_browser::_file(
     std::filesystem::path path
   ) noexcept {
     auto [preview, inserted] = _previews.try_emplace(path);
@@ -85,7 +85,7 @@ namespace filer {
         });
   }
 
-  std::vector<std::shared_ptr<view>> viewer::sorted_dirs(
+  std::vector<std::shared_ptr<view>> grid_browser::sorted_dirs(
     const std::filesystem::path& path
   ) noexcept {
     std::vector<std::shared_ptr<view>> entrys;
@@ -151,7 +151,7 @@ namespace filer {
     return entrys;
   }
 
-  std::string viewer::limitter(std::string_view str, std::size_t len) const noexcept {
+  std::string grid_browser::limitter(std::string_view str, std::size_t len) const noexcept {
     return str.size() >= len
       ? str.substr(0, len - 3) + std::string("...")
       : std::string(str);
